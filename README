@@ -1,0 +1,23 @@
+===================================   File Merger:  ======================
+This server merges different sorted files to one sorted file
+
+Design:
+1. A main thread scans the given directory and if it finds more than one files it sends to worker thread to merge. The main thread does not process if there is only one file
+2. Number of worker threads can be passed as an arguments to the server.
+3. Communication via main thread and worker thread is via async queue. For each thread there will be one queue from main thrread to worker
+4. Worker thread merges to files to one sorted file and its flow is as follow
+    a. It rename the source files to <filename>.processing
+    b. It read files with maximum limit of lines (based on the memory limit passed as an argument. We calculate the number line limit by dividing the memory size limit by 100. Assuming each line of size 100         bytes) to avoid memory overflow.
+    c. The merged file is name as "INTER_<thread_id>_<timestamp.tmp>" and once the merge completes it rename the temporary file to INTER_<thread_id>_<timestamp>
+    d. The files are renamed so that it can not be picked by the main thrrad.
+
+
+Usage:
+To compile the code run the command "make" inside the directory. You can clean the old binaries using the command "make clean"
+Run: You can run the server using the below command
+    ./filemerger -t 4 -m 300 -d ./data or ./filemerger --job 4 --memory 1024 --directory ./data
+
+    options description:
+    -t number of threads
+    -m memory limit in bytes
+    -d directory to be scanned
